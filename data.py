@@ -28,12 +28,39 @@ def make_asin_dict(output_folder,input_file,log_ids=False,id_file="ids.csv",num_
         with open(id_file,"w") as output:
             for asin in ids:
                 output.write(asin+"\n")
-        
+
+def merge_and_clean_books(book_ids,output_file,asin_folder,meta_content,review_content):
+    '''
+    puts all the asin files from the ::asin_folder:: together to one jsonl file ::output_file:: using all the ids 
+    specified in the ::book_ids:: file
+    only the keys specified in ::meta_content:: and ::review_content:: will be kept
+    '''
+    with open(book_ids,"r") as asins:
+        for asin in asins:
+            if(len(asin)>=1):
+                with open(f"{asin_folder}/{asin}.jsonl","r") as data:
+                    metadata = json.loads(data.readline())
+                    cleaned_data={}
+                    reviews = []
+                    for line in data:
+                        review = json.loads(line)
+                        cleaned_review ={}
+                        for key in review_content:
+                            cleaned_review[key]=review[key]
+                        reviews.append(cleaned_review)
+                    cleaned_data["reviews"]=reviews
+                    for key in meta_content:
+                        cleaned_data[key]=metadata[key]
+                with open(output_file,"a+") as output:
+                    output_data={asin:cleaned_data}
+                    output.write(json.dumps(output_data))                    
+
         
 def main():
+    print("logging metadata")
     make_asin_dict("asins",metadata_path,True)
-    print("now reviews")
+    print("logging reviews")
     make_asin_dict("asins",review_path)
-    #print(asin_dict).keys()
+    merge_and_clean_books("ids.csv","book_data.jsonl","asins",["title","average_rating","rating_number","features","description","price","categories","details"],["rating","title","text","helpful_vote","verified_purchase"])
 if __name__=="__main__":
     main()
