@@ -1,4 +1,4 @@
-
+import json
 
 metadata_path="meta_Books.jsonl/meta_Books.jsonl"
 review_path="Books.jsonl/Books.jsonl"
@@ -58,7 +58,7 @@ def merge_and_clean_books(book_ids,output_file,asin_folder,meta_content,review_c
         
 def main():
     print("logging metadata")
-    make_asin_dict("asins",metadata_path,True)
+    #make_asin_dict("asins",metadata_path,True)
     print("logging reviews")
     make_asin_dict("asins",review_path)
     merge_and_clean_books("ids.csv","book_data.jsonl","asins",["title","average_rating","rating_number","features","description","price","categories","details"],["rating","title","text","helpful_vote","verified_purchase"])
